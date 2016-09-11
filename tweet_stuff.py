@@ -12,11 +12,9 @@ auth.secure = True
 auth.set_access_token(secrets['Access Token'], secrets['Access Token Secret'])
 api = tweepy.API(auth)
 
-headlines = get_best_headlines(url, True)
-if headlines:
-    #print(headlines[0])
-    api.update_status(headlines[0])
-
-#public_tweets = api.home_timeline()
-#for tweet in public_tweets:
-#    print(tweet.text)
+headlines = get_best_headlines(url)
+for headline in headlines:
+    if len(headline) < 140:
+        print(headline)
+        api.update_status(headline)
+        break
