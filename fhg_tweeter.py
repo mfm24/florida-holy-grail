@@ -57,6 +57,10 @@ headline_urls = [('http://www.baynews9.com/content/'
 headlines = sum([get_headlines(url) for url in headline_urls], [])
 
 holy_grail_text = untokenize(holy_grail_tokens)
+# replace 'CAPS: ' with newline to remove some dialogue markup
+holy_grail_text = re.sub('[A-Z0-9]+:', '.\n', holy_grail_text)
+# remove [text]
+holy_grail_text = re.sub('\s*\[[^\]]*\]\s*', ' ',  holy_grail_text)
 holy_grail_sentences = nltk.sent_tokenize(holy_grail_text)
 holy_grail_vocab = set(holy_grail_tokens)
 stopwords = set(nltk.corpus.stopwords.words('english'))
