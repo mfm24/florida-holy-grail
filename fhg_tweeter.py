@@ -73,14 +73,19 @@ def mangle_title(title):
         if (w in holy_grail_vocab 
                 and w not in stopwords
                 and w not in string.punctuation
-                and len(w) > 3 ):
+                and len(w) > 3
+                and i > 2):
             print('found match for ', w)
             cands = get_sentences_containing(w)
-            #print(w, cands)
-            root = untokenize(title_words[:i-1])
+            root = untokenize(title_words[:i])
             for c in cands:
-                ret.append(root + " " + c[c.find(w):])
+                last_bit = c[c.find(w):]
+                list_bit = last_bit.split(' ')
+                if len(list_bit) > 3:
+                    ret.append(root + " " + last_bit)
+                    #print('news title', title_words)
+                    #print('last bit', last_bit)
+                    #print('all', root + " " + last_bit)
     return ret
 
 candidates = sum([mangle_title(h) for h in headlines], [])
-
