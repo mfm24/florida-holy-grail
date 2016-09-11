@@ -15,6 +15,7 @@ print('Loaded Tfidf model')
 holy_grail_tokens = pickle.load(open('holy_grail_tokens.pkl', 'rb'))
 print('Loaded holy grail tokens')
 
+
 def untokenize(words):
     """
     Untokenizing a text undoes the tokenizing operation, restoring
@@ -51,7 +52,7 @@ def get_headlines(rss_url):
             
 # list of urls to get headlines from:
 headline_urls = [('http://www.baynews9.com/content/'
-                 'news/baynews9/feeds/rss.html/strange.html')]
+                 'news/baynews9/feeds/rss.html/local-news.html')]
 # get headlines and sum into a single list
 headlines = sum([get_headlines(url) for url in headline_urls], [])
 
@@ -59,7 +60,26 @@ holy_grail_text = untokenize(holy_grail_tokens)
 holy_grail_sentences = nltk.sent_tokenize(holy_grail_text)
 holy_grail_vocab = set(holy_grail_tokens)
 stopwords = set(nltk.corpus.stopwords.words('english'))
+# we have two options for the tfidf:
+# 1. Use tfidf. Terms that appear frequently in HG will
+# get a higher score:
+# holy_grail_tfidf = tfidf_vectorizer.transform([holy_grail_text])
+# 2. Treat tf as binary. Means the weight of elderberries = witch
+# which is good. We're using this:
+holy_grail_tfidf = tfidf_vectorizer.transform([" ".join(holy_grail_vocab)])
 
+def score_sentence(s):
+    # so tokenize t.transform([string0, string1, ... stringN])
+    # returns an array of N x W where W is num of words.
+    # to find score, we want to sum the words in mp_tf_idf that also occur
+    # in s. We could do this with a CountVectorizer with the same vocabulary
+    # as our Tdidf Vectorizer (or build the tdidf manually, which may not be that 
+    # much harder?) but for now we can also just cast to bool to convert counts
+    # to 0 or 1 (this won't give extra credit if a very mpish word appears more than
+    # once, but I don't think it's significant?)
+    in_s = tfidf_vectorizer.transform([s])[0].astype(bool)
+    n = in_s.sum()
+    return (holy_grail_tfidf[0] * in_s.T)[0, 0] / n
 
 def get_sentences_containing(s):
     return [x for x in holy_grail_sentences if ' '+ s+' ' in x]
@@ -89,3 +109,7 @@ def mangle_title(title):
     return ret
 
 candidates = sum([mangle_title(h) for h in headlines], [])
+with_scores = [(score_sentence(c), c) for c in candidates]
+import pprint
+pprint.pprint(sorted(with_scores, reverse=True))
+
