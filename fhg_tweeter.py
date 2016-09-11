@@ -110,7 +110,7 @@ def mangle_title(title):
 
 
 def get_best_headlines(url, clear_cache=False):
-    return get_best_headlines_from_multiple([url], clear_cache=False)
+    return get_best_headlines_from_multiple([url], clear_cache)
 
 
 def get_best_headlines_from_multiple(urls, clear_cache=False):
