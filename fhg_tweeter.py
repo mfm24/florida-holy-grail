@@ -9,6 +9,7 @@ import feedparser
 import math
 import re
 import pickle
+from collections import deque
 
 tfidf_vectorizer = pickle.load(open('holy_grail_tfidf.pkl', 'rb'))
 print('Loaded Tfidf model')
@@ -50,11 +51,6 @@ def get_headlines(rss_url):
         headlines.append(full.strip())
     return headlines
             
-# list of urls to get headlines from:
-headline_urls = [('http://www.baynews9.com/content/'
-                 'news/baynews9/feeds/rss.html/local-news.html')]
-# get headlines and sum into a single list
-headlines = sum([get_headlines(url) for url in headline_urls], [])
 
 holy_grail_text = untokenize(holy_grail_tokens)
 # replace 'CAPS: ' with newline to remove some dialogue markup
@@ -112,8 +108,33 @@ def mangle_title(title):
                     #print('all', root + " " + last_bit)
     return ret
 
-candidates = sum([mangle_title(h) for h in headlines], [])
-with_scores = [(score_sentence(c), c) for c in candidates]
-import pprint
-pprint.pprint(sorted(with_scores, reverse=True))
 
+def get_best_headlines(url):
+    return get_best_headlines_from_multiple([url])
+
+
+def get_best_headlines_from_multiple(urls, clear_cache=False):
+    try:
+        seen_headlines = pickle.load(open('seen_headlines.pkl', 'rb'))
+    except IOError:
+        # we store 500 headlines
+        seen_headlines = deque([], 500)
+    if clear_cache:
+        seen_headlines = deque([], 500)
+    headlines = sum([get_headlines(url) for url in urls], [])
+    # remove any seen headlines
+    headlines = [h for h in headlines 
+                if not h in seen_headlines]
+    candidates = sum([mangle_title(h) for h in headlines], [])
+    # with_scores = [(score_sentence(c), c) for c in candidates]
+    # we say we've seen these, and save to disk
+    seen_headlines.extend(headlines)
+    pickle.dump(seen_headlines, open('seen_headlines.pkl', 'wb'))
+    return sorted(candidates, key=score_sentence, reverse=True)
+
+
+if __name__ == "__main__":
+    from pprint import pprint
+    url = ('http://www.baynews9.com/content'
+            '/news/baynews9/feeds/rss.html/strange.html')
+    pprint(get_best_headlines(url))
