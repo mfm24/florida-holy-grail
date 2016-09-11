@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+twitter_keys.json
 
 # C extensions
 *.so
