@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 twitter_keys.json
+seen_headlines.pkl
 
 # C extensions
 *.so

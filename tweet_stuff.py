@@ -6,7 +6,7 @@ from fhg_tweeter import get_best_headlines
 url = ('http://www.baynews9.com/content'
             '/news/baynews9/feeds/rss.html/strange.html')
 
-headlines = get_best_headlines(url)
+headlines = get_best_headlines(url, True)
 if headlines:
     print(headlines)
 secrets = json.load(open('twitter_keys.json'))
